@@ -18,20 +18,17 @@ from utils.utils import \
 def _get_config():
     config = dotenv.dotenv_values(".env")
     _dir = config["DATA_DIR"]
-
     _uri = config["REQ_URL"]
     _csv_dir = config["CSV_DIR"]
+    _length = config["LENGTH"]
 
-    return _uri, _dir, _csv_dir
+    return _uri, _dir, _csv_dir, _length
 
 
-def _get_range():
+def _get_range(_length):
     """Get dates of 5 days range"""
-    # start from today go back to 5 days
-    # loop for 30 days
-
     _now = datetime.date.today() - datetime.timedelta(days=4)
-    for _x in range(0, 30, 5):
+    for _x in range(0, _length, 5):
         _begin = _now - datetime.timedelta(days=_x)
         _end = _begin + datetime.timedelta(days=4)
         _begin_tup = (
@@ -104,14 +101,14 @@ def create_csv(_directory, _csv_directory):
 
 def main():
     """
-    Scrape API for 5 days for the past 30 days
+    Scrape API for 5 days for the past length of days
     Process HTML and save data in file
     """
 
     _headers = read_from_file("headers.json")
     _raw_data = read_from_file("raw_data.txt")
-    _uri, _dir, _csv_dir = _get_config()
-    _dates_tuple = _get_range()
+    _uri, _dir, _csv_dir, _length = _get_config()
+    _dates_tuple = _get_range(_length)
     scrape(_uri, _headers, _raw_data, _dir, _dates_tuple)
     create_csv(_dir, _csv_dir)
 
