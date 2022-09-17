@@ -1,0 +1,13 @@
+# data
+*.json
+*.txt
+!requirements.txt
+data/*
+
+# settings
+.env
+
+# python
+__pycache__/
+*.py[cod]
+*$py.class
