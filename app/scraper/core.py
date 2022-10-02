@@ -17,12 +17,11 @@ from utils.utils import \
 
 def _get_config():
     config = dotenv.dotenv_values(".env")
-    _dir = config["DATA_DIR"]
     _uri = config["REQ_URL"]
     _csv_dir = config["CSV_DIR"]
-    _length = config["LENGTH"]
+    _length = int(config["LENGTH"])
 
-    return _uri, _dir, _csv_dir, _length
+    return _uri, _csv_dir, _length
 
 
 def _get_range(_length):
@@ -74,12 +73,22 @@ def scrape(_uri, _headers, _raw_data, _dir, _data):
         _raw_data_with_dates = _replace_dates(
             _raw_data, (tup[0], tup[1]))
         _res = _post_request(_uri, _headers, _raw_data_with_dates)
-
-        _filename = f'{tup[0][0]}-{tup[0][1]}-{tup[0][2]}.html'
+        # year - month - day
+        _filename = f'{tup[0][2]}-{tup[0][1]}-{tup[0][0]}.csv'
         _file_path = os.sep.join([_dir, _filename])
 
+        _html = BeautifulSoup(_res.text, 'html.parser')
+        _table = _html.find(id="GV_prices")
+
+        if _table is None:
+            print(f'{_filename} has no values.')
+            continue
+
+        _rows = _table.find_all("tr", class_="")
+
         with open(_file_path, encoding="utf-8", mode="w+") as _file:
-            _file.write(_res.text)
+            for _row in _rows:
+                _file.write(_row.get_text(",", strip=True) + '\n')
         _file.close()
 
 
@@ -107,10 +116,10 @@ def main():
 
     _headers = read_from_file("headers.json")
     _raw_data = read_from_file("raw_data.txt")
-    _uri, _dir, _csv_dir, _length = _get_config()
+    _uri, _csv_dir, _length = _get_config()
     _dates_tuple = _get_range(_length)
-    scrape(_uri, _headers, _raw_data, _dir, _dates_tuple)
-    create_csv(_dir, _csv_dir)
+    scrape(_uri, _headers, _raw_data, _csv_dir, _dates_tuple)
+    #create_csv(_dir, _csv_dir)
 
     print("scraped")
 
