@@ -93,6 +93,11 @@ def main():
 
     _files = os.path.join(_csv_dir, "*.csv")
     _files = glob.glob(_files)
+
+    if len(_files) == 0:
+        print("There are no files to process.")
+        return
+
     _df = pd.concat([pd.read_csv(f, names=_colummns.values()) for f in _files])
 
     #_combined_filename = os.path.join(_csv_dir, "combined_csv.csv")
